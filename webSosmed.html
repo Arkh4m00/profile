@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduConnect 605 • Instagram Clone Fixed</title>
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --ig-primary: #E1306C;
+            --ig-secondary: #405DE6;
+            --ig-dark: #000;
+            --ig-light: #fafafa;
+        }
+        body {
+            background-color: var(--ig-dark);
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+        .story-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            padding: 3px;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .story-circle:hover {
+            transform: scale(1.05);
+        }
+        .story-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid #000;
+            object-fit: cover;
+        }
+        .post-img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .post-img:hover {
+            transform: scale(1.01);
+        }
+        .reel-video {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .profile-img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--ig-primary);
+            cursor: pointer;
+        }
+        .profile-post-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+        .profile-post-img:hover {
+            opacity: 0.8;
+        }
+        .follow-btn {
+            background: var(--ig-primary);
+            color: white;
+            border: none;
+            padding: 5px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .unfollow-btn {
+            background: #262626;
+            color: white;
+            border: 1px solid #555;
+            padding: 5px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .like-animation {
+            animation: like 0.8s ease;
+        }
+        @keyframes like {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 0; }
+        }
+        .nav-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #333;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #000;
+            border: 1px solid #333;
+        }
+        .modal-header {
+            border-bottom: 1px solid #333;
+        }
+        .modal-footer {
+            border-top: 1px solid #333;
+        }
+        .heart-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+            color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .post-double-click {
+            position: relative;
+        }
+        /* Story progress bar */
+        .story-progress {
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            margin-bottom: 10px;
+        }
+        .story-progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        /* Close button for story */
+        .story-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        /* Story navigation arrows */
+        .story-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0,0,0,0.5);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        .story-prev {
+            left: 20px;
+        }
+        .story-next {
+            right: 20px;
+        }
+        /* Page transition */
+        .page {
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-dark border-bottom border-secondary py-3">
+        <div class="container">
+            <a class="navbar-brand fw-bold fs-4" href="#home" onclick="showPage('home')">
+                <i class="fab fa-instagram me-2"></i>EduConnect
+            </a>
+            <div class="d-flex">
+                <a href="#home" class="text-white mx-3 fs-5 nav-link active" onclick="showPage('home')">
+                    <i class="fas fa-home"></i>
+                </a>
+                <a href="#reels" class="text-white mx-3 fs-5 nav-link" onclick="showPage('reels')">
+                    <i class="fas fa-video"></i>
+                </a>
+                <a href="#profile" class="text-white mx-3 fs-5 nav-link" onclick="showPage('profile')">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mb-5 pb-5">
+        <!-- Home Page -->
+        <div id="home" class="page">
+            <!-- Stories -->
+            <div class="d-flex overflow-auto my-4 py-2" id="storiesContainer">
+                <!-- Stories will be loaded by JavaScript -->
+            </div>
+
+            <!-- Posts Container -->
+            <div id="postsContainer">
+                <!-- Posts will be loaded by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Reels Page -->
+        <div id="reels" class="page d-none">
+            <h4 class="mb-4 px-3"><i class="fas fa-video me-2"></i>Reels</h4>
+            <div id="reelsContainer">
+                <!-- Reels will be loaded by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profile" class="page d-none">
+            <div id="profileContainer">
+                <!-- Profile content will be loaded by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="nav-fixed d-flex justify-content-around py-3">
+        <a href="#home" class="text-white nav-link active" onclick="showPage('home')">
+            <i class="fas fa-home fa-lg"></i>
+        </a>
+        <a href="#reels" class="text-white nav-link" onclick="showPage('reels')">
+            <i class="fas fa-video fa-lg"></i>
+        </a>
+        <a href="#profile" class="text-white nav-link" onclick="showPage('profile')">
+            <i class="fas fa-user fa-lg"></i>
+        </a>
+    </nav>
+
+    <!-- Story Viewer Modal -->
+    <div class="modal fade" id="storyModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content bg-dark">
+                <div class="modal-body p-0 position-relative">
+                    <!-- Progress Bars -->
+                    <div class="position-absolute top-0 start-0 end-0 p-3 d-flex gap-1" id="storyProgressBars">
+                        <!-- Progress bars will be added here -->
+                    </div>
+                    
+                    <!-- Close Button -->
+                    <button type="button" class="story-close-btn" onclick="closeStory()">
+                        <i class="fas fa-times fa-lg"></i>
+                    </button>
+                    
+                    <!-- Navigation Arrows -->
+                    <button class="story-nav story-prev" onclick="prevStory()">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="story-nav story-next" onclick="nextStory()">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    
+                    <!-- Story Content -->
+                    <div class="h-100 d-flex align-items-center justify-content-center" id="storyContent">
+                        <img src="" id="storyImage" class="img-fluid" style="max-height: 100vh;">
+                        <div class="position-absolute bottom-0 start-0 end-0 p-4 text-center">
+                            <h4 id="storyUsername"></h4>
+                            <p id="storyTime"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Detail Modal -->
+    <div class="modal fade" id="postModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postModalTitle">Post Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <img src="" id="postModalImage" class="img-fluid rounded mb-3">
+                    <h6 id="postModalCaption"></h6>
+                    <div class="mt-3">
+                        <strong>Likes:</strong> <span id="postModalLikes">0</span><br>
+                        <strong>Comments:</strong> <span id="postModalComments">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Data Stories
+        const stories = [
+            {id: 1, username: "You", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", 
+             time: "Just now", hasSeen: false},
+            {id: 2, username: "Budi", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", 
+             time: "2h ago", hasSeen: false},
+            {id: 3, username: "Sari", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", 
+             time: "4h ago", hasSeen: false},
+            {id: 4, username: "Rizki", avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", 
+             time: "6h ago", hasSeen: true},
+            {id: 5, username: "Dewi", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80", 
+             time: "1d ago", hasSeen: true}
+        ];
+
+        // Data Posts
+        const posts = [
+            {id: 1, username: "budi_coding", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", 
+             caption: "Just finished today's coding challenge! #EduConnect605 #Coding", 
+             likes: 142, comments: 24, time: "2h ago"},
+            {id: 2, username: "sari_design", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             image: "https://images.unsplash.com/photo-1561070791-2526d30994b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80", 
+             caption: "UI/UX design workshop at campus! #Design #SMA605", 
+             likes: 89, comments: 12, time: "5h ago"}
+        ];
+
+        // Data Reels
+        const reels = [
+            {id: 1, username: "rizki_code", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             gif: "https://media.giphy.com/media/coxQHKASG60HrHtvkt/giphy.gif", 
+             title: "JavaScript Tips", likes: "1.2k", comments: "245"},
+            {id: 2, username: "dewi_design", avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80", 
+             gif: "https://media.giphy.com/media/LmNwrBhejkK9EFP504/giphy.gif", 
+             title: "Design Process", likes: "2.4k", comments: "512"}
+        ];
+
+        // Current story index
+        let currentStoryIndex = 0;
+        let storyModal = null;
+        let progressInterval = null;
+        let isStoryActive = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHomePage();
+            loadReelsPage();
+            loadProfilePage();
+            setupEventListeners();
+            
+            // Initialize modal
+            storyModal = new bootstrap.Modal(document.getElementById('storyModal'), {
+                keyboard: false,
+                backdrop: 'static'
+            });
+        });
+
+        // Load Home Page
+        function loadHomePage() {
+            loadStories();
+            loadPosts();
+        }
+
+        // Load Stories
+        function loadStories() {
+            const container = document.getElementById('storiesContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            stories.forEach((story, index) => {
+                const storyDiv = document.createElement('div');
+                storyDiv.className = 'text-center mx-2';
+                storyDiv.innerHTML = `
+                    <div class="story-circle mb-2" onclick="openStory(${index})" 
+                         style="${story.hasSeen ? 'background: #333 !important;' : ''}">
+                        <img src="${story.avatar}" class="story-img">
+                    </div>
+                    <small>${story.username}</small>
+                `;
+                container.appendChild(storyDiv);
+            });
+        }
+
+        // Load Posts
+        function loadPosts() {
+            const container = document.getElementById('postsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            posts.forEach(post => {
+                const postCard = document.createElement('div');
+                postCard.className = 'card bg-dark border-secondary mb-4';
+                postCard.innerHTML = `
+                    <div class="card-body p-0">
+                        <div class="d-flex justify-content-between p-3">
+                            <div class="d-flex align-items-center">
+                                <img src="${post.avatar}" class="rounded-circle me-3" width="40" height="40">
+                                <div>
+                                    <strong class="d-block">${post.username}</strong>
+                                    <small class="text-muted">${post.time}</small>
+                                </div>
+                            </div>
+                            <i class="fas fa-ellipsis-h text-muted"></i>
+                        </div>
+                        
+                        <div class="post-double-click position-relative">
+                            <img src="${post.image}" class="post-img w-100" 
+                                 onclick="viewPostModal('${post.username}', '${post.caption}', '${post.image}')">
+                            <div class="heart-overlay" id="heartOverlay${post.id}">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="p-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <div>
+                                    <button class="btn btn-link text-white p-0 me-3 like-btn" data-post="${post.id}">
+                                        <i class="far fa-heart fa-lg"></i>
+                                    </button>
+                                    <button class="btn btn-link text-white p-0 me-3" onclick="viewPostDetail(${post.id})">
+                                        <i class="far fa-comment fa-lg"></i>
+                                    </button>
+                                    <button class="btn btn-link text-white p-0 me-3">
+                                        <i class="far fa-paper-plane fa-lg"></i>
+                                    </button>
+                                </div>
+                                <button class="btn btn-link text-white p-0">
+                                    <i class="far fa-bookmark fa-lg"></i>
+                                </button>
+                            </div>
+                            
+                            <p class="mb-2"><strong id="likeCount${post.id}">${post.likes} likes</strong></p>
+                            <p class="mb-2">
+                                <strong>${post.username}</strong> ${post.caption}
+                            </p>
+                            <small class="text-muted d-block mb-2" onclick="viewPostDetail(${post.id})" style="cursor: pointer;">
+                                View all ${post.comments} comments
+                            </small>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-dark text-white border-0" 
+                                       placeholder="Add a comment...">
+                                <button class="btn btn-link text-primary">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(postCard);
+            });
+            
+            setupDoubleClick();
+            setupLikeButtons();
+        }
+
+        // Load Reels
+        function loadReelsPage() {
+            const container = document.getElementById('reelsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            reels.forEach(reel => {
+                const reelCard = document.createElement('div');
+                reelCard.className = 'card bg-dark border-secondary mb-4';
+                reelCard.innerHTML = `
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <img src="${reel.avatar}" class="rounded-circle me-3" width="40" height="40">
+                                <div>
+                                    <strong class="d-block">${reel.username}</strong>
+                                    <small class="text-muted">${reel.title}</small>
+                                </div>
+                            </div>
+                            <button class="btn follow-btn btn-sm">Follow</button>
+                        </div>
+                        
+                        <div class="position-relative">
+                            <img src="${reel.gif}" class="reel-video"
+                                 onclick="viewReelDetail('${reel.title}', '${reel.username}', '${reel.gif}')">
+                            <div class="position-absolute bottom-0 end-0 m-3">
+                                <button class="btn btn-link text-white p-0 d-block mb-3">
+                                    <i class="far fa-heart fa-lg"></i><br>
+                                    <small>${reel.likes}</small>
+                                </button>
+                                <button class="btn btn-link text-white p-0 d-block mb-3">
+                                    <i class="far fa-comment fa-lg"></i><br>
+                                    <small>${reel.comments}</small>
+                                </button>
+                                <button class="btn btn-link text-white p-0 d-block">
+                                    <i class="far fa-paper-plane fa-lg"></i><br>
+                                    <small>Share</small>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <p class="mt-3 mb-0">
+                            <strong>${reel.username}</strong> ${reel.title}
+                            <span class="text-primary">#${reel.username.split('_')[1]}</span>
+                        </p>
+                    </div>
+                `;
+                container.appendChild(reelCard);
+            });
+        }
+
+        // Load Profile
+        function loadProfilePage() {
+            const container = document.getElementById('profileContainer');
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="text-center mb-5 px-3">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" 
+                         class="profile-img mb-3" 
+                         onclick="viewProfilePicture()">
+                    <h4>alif_developer</h4>
+                    <p class="text-muted">SMA 605 Digital Student</p>
+                    
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="text-center mx-4">
+                            <strong id="postCount">${posts.length}</strong>
+                            <div class="text-muted">Posts</div>
+                        </div>
+                        <div class="text-center mx-4" onclick="viewFollowers()" style="cursor: pointer;">
+                            <strong id="followerCount">256</strong>
+                            <div class="text-muted">Followers</div>
+                        </div>
+                        <div class="text-center mx-4" onclick="viewFollowing()" style="cursor: pointer;">
+                            <strong id="followingCount">124</strong>
+                            <div class="text-muted">Following</div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-center mb-4">
+                        <button class="btn btn-outline-light me-2">Edit Profile</button>
+                        <button class="btn btn-outline-light">Share Profile</button>
+                    </div>
+                </div>
+
+                <h6 class="mb-3 px-3">Your Posts</h6>
+                <div class="row g-2 px-3 mb-5" id="profilePostsGrid">
+                    ${posts.map((post, index) => `
+                        <div class="col-4">
+                            <img src="${post.image}" class="profile-post-img"
+                                 onclick="viewPostDetail(${post.id})">
+                        </div>
+                    `).join('')}
+                    <div class="col-4">
+                        <div class="border border-secondary rounded d-flex align-items-center justify-content-center" 
+                             style="height: 120px; cursor: pointer;"
+                             onclick="createNewPost()">
+                            <i class="fas fa-plus fa-2x text-muted"></i>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Open Story
+        function openStory(index) {
+            currentStoryIndex = index;
+            isStoryActive = true;
+            
+            // Mark story as seen
+            stories[index].hasSeen = true;
+            loadStories();
+            
+            // Show story modal
+            showStory();
+        }
+
+        // Show Story
+        function showStory() {
+            const story = stories[currentStoryIndex];
+            
+            // Set story content
+            document.getElementById('storyImage').src = story.image;
+            document.getElementById('storyUsername').textContent = story.username;
+            document.getElementById('storyTime').textContent = story.time;
+            
+            // Clear previous progress bars
+            const progressContainer = document.getElementById('storyProgressBars');
+            progressContainer.innerHTML = '';
+            
+            // Create progress bars for all stories
+            stories.forEach((s, i) => {
+                const progressBar = document.createElement('div');
+                progressBar.className = 'story-progress flex-grow-1';
+                progressBar.innerHTML = `<div class="story-progress-fill" id="storyProgress${i}"></div>`;
+                progressContainer.appendChild(progressBar);
+            });
+            
+            // Show modal
+            storyModal.show();
+            
+            // Start progress animation
+            startStoryProgress();
+            
+            // Add keyboard listener for ESC key
+            document.addEventListener('keydown', handleStoryKeydown);
+            
+            // Add click listener to close on backdrop
+            document.getElementById('storyModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeStory();
+                }
+            });
+        }
+
+        // Start story progress
+        function startStoryProgress() {
+            clearInterval(progressInterval);
+            
+            const progressBar = document.getElementById(`storyProgress${currentStoryIndex}`);
+            let width = 0;
+            
+            progressInterval = setInterval(() => {
+                if (width >= 100) {
+                    nextStory();
+                    return;
+                }
+                width += 2;
+                progressBar.style.width = width + '%';
+            }, 100); // 5 seconds total
+        }
+
+        // Next story
+        function nextStory() {
+            clearInterval(progressInterval);
+            
+            if (currentStoryIndex < stories.length - 1) {
+                currentStoryIndex++;
+                showStory();
+            } else {
+                closeStory();
+            }
+        }
+
+        // Previous story
+        function prevStory() {
+            clearInterval(progressInterval);
+            
+            if (currentStoryIndex > 0) {
+                currentStoryIndex--;
+                showStory();
+            }
+        }
+
+        // Close story properly
+        function closeStory() {
+            clearInterval(progressInterval);
+            storyModal.hide();
+            isStoryActive = false;
+            
+            // Remove event listeners
+            document.removeEventListener('keydown', handleStoryKeydown);
+            
+            // Reset modal for next open
+            setTimeout(() => {
+                const modalBackdrop = document.querySelector('.modal-backdrop');
+                if (modalBackdrop) {
+                    modalBackdrop.remove();
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 300);
+        }
+
+        // Handle keyboard for story
+        function handleStoryKeydown(e) {
+            if (e.key === 'Escape') {
+                closeStory();
+            } else if (e.key === 'ArrowRight') {
+                nextStory();
+            } else if (e.key === 'ArrowLeft') {
+                prevStory();
+            }
+        }
+
+        // Show page
+        function showPage(pageId) {
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show selected page
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.add('d-none');
+            });
+            document.getElementById(pageId).classList.remove('d-none');
+            
+            // Update URL hash
+            window.location.hash = pageId;
+        }
+
+        // View post detail
+        function viewPostDetail(postId) {
+            const post = posts.find(p => p.id === postId) || posts[0];
+            viewPostModal(post.username, post.caption, post.image);
+        }
+
+        // View post modal
+        function viewPostModal(username, caption, image) {
+            const postModal = new bootstrap.Modal(document.getElementById('postModal'));
+            document.getElementById('postModalTitle').textContent = `Post by ${username}`;
+            document.getElementById('postModalImage').src = image;
+            document.getElementById('postModalCaption').textContent = caption;
+            
+            const post = posts.find(p => p.username === username) || {likes: 0, comments: 0};
+            document.getElementById('postModalLikes').textContent = post.likes || "0";
+            document.getElementById('postModalComments').textContent = post.comments || "0";
+            
+            postModal.show();
+        }
+
+        // View reel detail
+        function viewReelDetail(title, username, gifUrl) {
+            const postModal = new bootstrap.Modal(document.getElementById('postModal'));
+            document.getElementById('postModalTitle').textContent = `${title} by ${username}`;
+            document.getElementById('postModalImage').src = gifUrl;
+            document.getElementById('postModalCaption').textContent = `Reel by ${username}`;
+            document.getElementById('postModalLikes').textContent = "1.2k";
+            document.getElementById('postModalComments').textContent = "245";
+            postModal.show();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Follow buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.follow-btn')) {
+                    const btn = e.target.closest('.follow-btn');
+                    if (btn.textContent === 'Follow') {
+                        btn.textContent = 'Following';
+                        btn.classList.remove('follow-btn');
+                        btn.classList.add('unfollow-btn');
+                        showNotification('Started following');
+                    } else {
+                        btn.textContent = 'Follow';
+                        btn.classList.remove('unfollow-btn');
+                        btn.classList.add('follow-btn');
+                        showNotification('Unfollowed');
+                    }
+                }
+            });
+            
+            // Handle page load from hash
+            window.addEventListener('load', function() {
+                const hash = window.location.hash.substring(1) || 'home';
+                showPage(hash);
+            });
+        }
+
+        // Setup like buttons
+        function setupLikeButtons() {
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const icon = this.querySelector('i');
+                    const postId = this.getAttribute('data-post');
+                    const likeCount = document.getElementById(`likeCount${postId}`);
+                    
+                    if (icon.classList.contains('far')) {
+                        icon.classList.remove('far', 'fa-heart');
+                        icon.classList.add('fas', 'fa-heart', 'text-danger');
+                        
+                        const current = parseInt(likeCount.textContent);
+                        likeCount.textContent = (current + 1) + ' likes';
+                        showNotification('Post liked!');
+                    } else {
+                        icon.classList.remove('fas', 'fa-heart', 'text-danger');
+                        icon.classList.add('far', 'fa-heart');
+                        
+                        const current = parseInt(likeCount.textContent);
+                        likeCount.textContent = (current - 1) + ' likes';
+                    }
+                });
+            });
+        }
+
+        // Setup double click for posts
+        function setupDoubleClick() {
+            document.querySelectorAll('.post-img').forEach(img => {
+                let lastClick = 0;
+                img.addEventListener('click', function(e) {
+                    const currentTime = new Date().getTime();
+                    const timeDiff = currentTime - lastClick;
+                    
+                    if (timeDiff < 300) {
+                        const card = this.closest('.card');
+                        const postId = card.querySelector('.like-btn').getAttribute('data-post');
+                        const heartOverlay = document.getElementById(`heartOverlay${postId}`);
+                        const likeBtn = card.querySelector('.like-btn i');
+                        const likeCount = document.getElementById(`likeCount${postId}`);
+                        
+                        heartOverlay.style.opacity = '1';
+                        heartOverlay.classList.add('like-animation');
+                        
+                        if (likeBtn.classList.contains('far')) {
+                            likeBtn.classList.remove('far', 'fa-heart');
+                            likeBtn.classList.add('fas', 'fa-heart', 'text-danger');
+                            
+                            const current = parseInt(likeCount.textContent);
+                            likeCount.textContent = (current + 1) + ' likes';
+                        }
+                        
+                        setTimeout(() => {
+                            heartOverlay.style.opacity = '0';
+                            heartOverlay.classList.remove('like-animation');
+                        }, 800);
+                    }
+                    
+                    lastClick = currentTime;
+                });
+            });
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = `
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        // Other functions
+        function viewProfilePicture() {
+            showNotification('Profile picture view');
+        }
+
+        function viewFollowers() {
+            showNotification('Followers list: 256 people');
+        }
+
+        function viewFollowing() {
+            showNotification('Following list: 124 accounts');
+        }
+
+        function createNewPost() {
+            showNotification('Create new post - feature coming soon!');
+        }
+    </script>
+</body>
+</html>
